@@ -21,7 +21,7 @@ char_int_to_str = {
 
 def deal_cards(cards, player1, player2, player3):
     """
-    deal 17 cards to 3 players
+    deal 17 cards to 3 players, No shuffling in doctests
     :param cards: 54 cards in a list
     :param player1: a player object
     :param player2: a player object
@@ -109,7 +109,7 @@ class Deck:
         """
         for card in move:
             if card in self.cards:
-                print(f"removed {card}")
+                # print(f"removed {card}")
                 self.cards.remove(card)
             else:
                 print(f"cannot remove {card}")
@@ -123,6 +123,7 @@ class Player:
         self.hand = Deck()
         self.hand_points = 0
         self.first_player_next_round = False
+        self.strength = 0  # 0-9, the higher the character will play stronger moves
 
     def update_hand_points(self):
         """

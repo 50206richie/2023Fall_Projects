@@ -23,6 +23,7 @@ TYPE_12_SERIAL_3_2 = 12
 TYPE_13_4_2 = 13
 TYPE_14_4_22 = 14
 TYPE_15_WRONG = 15
+TYPE_16_2_1 = 16
 
 MIN_SERIAL_SINGLE = 5
 MIN_SERIAL_PAIR = 3
@@ -82,6 +83,8 @@ def get_move_type(move: list) -> dict:
         case 3:
             if len(move_dict) == 1:
                 return {'type': TYPE_3_TRIPLE, 'rank': move[0]}
+            elif len(move_dict) == 2:
+                return {'type': TYPE_16_2_1, 'rank': move[1]}
             else:
                 return {'type': TYPE_15_WRONG}
 
@@ -128,13 +131,14 @@ class MoveGeneration:
     """generate legal moves
     this class was inspired by https://github.com/kwai/DouZero and has referenced some code from it
     """
-    def __init__(self, cards, rival_move):
+    def __init__(self, cards, rival_move, rule=0):
         self.cards = cards
         self.cards_unique = sorted(list(set(self.cards)))
         self.cards_dict = Counter(cards)
         self.rival_move = rival_move
         self.rival_move_length = len(rival_move)
         self.new_move = []
+        self.rule = rule
         self.move_type_weight_and_function = {
             TYPE_1_SINGLE: {'weight': 1, 'function': self.gen_type_1_single},
             TYPE_2_PAIR: {'weight': 2, 'function': self.gen_type_2_pair},
@@ -151,6 +155,8 @@ class MoveGeneration:
             TYPE_13_4_2: {'weight': 8, 'function': self.gen_type_13_4_2},
             TYPE_14_4_22: {'weight': 8, 'function': self.gen_type_14_4_22}
         }
+        if self.rule:
+            self.move_type_weight_and_function[TYPE_16_2_1] = {'weight': 3, 'function': self.gen_type_16_2_1}
 
     def generate_move(self):
         """get rival move and generate corresponding moves
@@ -498,13 +504,35 @@ class MoveGeneration:
 
         self.new_move = type_14_4_22_moves
 
+    def gen_type_16_2_1(self):
+        """
+        2+1
+        >>> mg = MoveGeneration([4, 4, 4, 5, 5, 5, 6, 6, 8], [3, 4, 4])
+        >>> mg.gen_type_16_2_1()
+        >>> mg.new_move
+        [[4, 5, 5], [5, 5, 6], [5, 5, 8], [4, 6, 6], [5, 6, 6], [6, 6, 8]]
+        >>> mg = MoveGeneration([4, 4, 5, 5, 5, 6, 6, 8], [])
+        >>> mg.gen_type_16_2_1()
+        >>> mg.new_move
+        [[4, 4, 5], [4, 4, 6], [4, 4, 8], [4, 5, 5], [5, 5, 6], [5, 5, 8], [4, 6, 6], [5, 6, 6], [6, 6, 8]]
+        """
+        rival_2 = [x for x in self.rival_move if Counter(self.rival_move)[x] == 2][0] if self.rival_move_length else 0
+        for k, v in self.cards_dict.items():
+            if v >= 2 and k > rival_2:
+                for i in self.cards:
+                    if i != k and [k, k, i] not in self.new_move:
+                        self.new_move.append([k, k, i])
+        for i in self.new_move:
+            i.sort()
 
-def play_a_move(player_hand: Deck, move_list: list, strength: int = 0) -> list:
+
+def play_a_move(player_hand: Deck, move_list: list, strength: int = 0, rule: int = 0) -> list:
     """
 
     :param player_hand:
     :param move_list:
     :param strength:
+    :param rule: original = 0, special = 1
     :return: the move played
     >>> a = Deck()
     >>> b = [[6, 6]]
@@ -519,12 +547,13 @@ def play_a_move(player_hand: Deck, move_list: list, strength: int = 0) -> list:
         else:
             rival_move = move_list[-1]
 
-    move_generator = MoveGeneration(player_hand.cards, rival_move)
+    move_generator = MoveGeneration(player_hand.cards, rival_move, rule)
     move_generator.generate_move()
     moves = move_generator.new_move
 
     # move as a move list, modify for difference
-    move = moves[strength] if len(moves) else []
+    idx = int(strength / 10 * len(moves))
+    move = moves[idx] if len(moves) else []
     player_hand.remove_card_from_hand(move)
 
     return move
