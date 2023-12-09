@@ -1,33 +1,8 @@
-"""
-This file is for dealing moves (detect, select, generate)
-"""
+"""This file is for dealing moves (detect, select, and generate)"""
 
 from collections import Counter
-from cards import *
+from constants import *
 from itertools import combinations
-
-# action types, referred from https://github.com/kwai/DouZero
-TYPE_0_PASS = 0
-TYPE_1_SINGLE = 1
-TYPE_2_PAIR = 2
-TYPE_3_TRIPLE = 3
-TYPE_4_BOMB = 4
-TYPE_5_KING_BOMB = 5
-TYPE_6_3_1 = 6
-TYPE_7_3_2 = 7
-TYPE_8_SERIAL_SINGLE = 8
-TYPE_9_SERIAL_PAIR = 9
-TYPE_10_SERIAL_TRIPLE = 10
-TYPE_11_SERIAL_3_1 = 11
-TYPE_12_SERIAL_3_2 = 12
-TYPE_13_4_2 = 13
-TYPE_14_4_22 = 14
-TYPE_15_WRONG = 15
-TYPE_16_2_1 = 16
-
-MIN_SERIAL_SINGLE = 5
-MIN_SERIAL_PAIR = 3
-MIN_SERIAL_TRIPLE = 2
 
 
 def is_continuous(move: list) -> bool:
@@ -40,8 +15,8 @@ def is_continuous(move: list) -> bool:
     >>> is_continuous([11, 12, 13, 14, 16])
     False
     """
-    for i in range(len(move)-1):
-        if move[i+1] - move[i] != 1:
+    for i in range(len(move) - 1):
+        if move[i + 1] - move[i] != 1:
             return False
     return True
 
@@ -92,11 +67,13 @@ def get_move_type(move: list) -> dict:
             if move_dict_cnt == {3: 1, 1: 1}:
                 return {'type': TYPE_6_3_1, 'rank': move[1]}
             elif move_dict_cnt == {4: 1}:
-                return {'type': TYPE_4_BOMB,  'rank': move[0]}
+                return {'type': TYPE_4_BOMB, 'rank': move[0]}
 
         case 5:  # 12345, 3+2
             if move_dict_cnt == {3: 1, 2: 1}:
                 return {'type': TYPE_7_3_2, 'rank': move[2]}  # XXXYY or YYXXX will all be X
+            elif move_dict_cnt == {2: 2, 1: 1}:
+                return {'type': TYPE_17_2_2_1}  # XXYYZ
             elif is_continuous(move):
                 return {'type': TYPE_8_SERIAL_SINGLE, 'rank': move[0], 'len': len(move)}
 
@@ -131,6 +108,7 @@ class MoveGeneration:
     """generate legal moves
     this class was inspired by https://github.com/kwai/DouZero and has referenced some code from it
     """
+
     def __init__(self, cards, rival_move, rule=0):
         self.cards = cards
         self.cards_unique = sorted(list(set(self.cards)))
@@ -139,6 +117,7 @@ class MoveGeneration:
         self.rival_move_length = len(rival_move)
         self.new_move = []
         self.rule = rule
+        # Action Type Weight ref: https://arxiv.org/pdf/2106.06135.pdf
         self.move_type_weight_and_function = {
             TYPE_1_SINGLE: {'weight': 1, 'function': self.gen_type_1_single},
             TYPE_2_PAIR: {'weight': 2, 'function': self.gen_type_2_pair},
@@ -155,8 +134,10 @@ class MoveGeneration:
             TYPE_13_4_2: {'weight': 8, 'function': self.gen_type_13_4_2},
             TYPE_14_4_22: {'weight': 8, 'function': self.gen_type_14_4_22}
         }
-        if self.rule:
+        if self.rule == 1:
             self.move_type_weight_and_function[TYPE_16_2_1] = {'weight': 3, 'function': self.gen_type_16_2_1}
+        if self.rule == 2:
+            self.move_type_weight_and_function[TYPE_17_2_2_1] = {'weight': 3, 'function': self.gen_type_17_2_2_1}
 
     def generate_move(self):
         """get rival move and generate corresponding moves
@@ -317,10 +298,10 @@ class MoveGeneration:
 
             if self.rival_move_length == 0:
                 # can generate length 5-12 cards for serial_single, 3-10 serial pair, 2-6 serial triple
-                for length in range(min_chain, len(card_set)+1):
+                for length in range(min_chain, len(card_set) + 1):
                     possible_chain = [start_card + x for x in range(length)]
                     if all(x in card_set for x in possible_chain):
-                        self.new_move.append(sorted(possible_chain*repeat))
+                        self.new_move.append(sorted(possible_chain * repeat))
             else:
                 rival_move_serial_unique = []
                 for k, v in Counter(self.rival_move).items():
@@ -328,7 +309,7 @@ class MoveGeneration:
                         rival_move_serial_unique.append(k)
                 possible_chain = [start_card + x for x in range(len(rival_move_serial_unique))]
                 if all(x in card_set for x in possible_chain) and possible_chain[0] > self.rival_move[0]:
-                    self.new_move.append(sorted(possible_chain*repeat))
+                    self.new_move.append(sorted(possible_chain * repeat))
 
     def gen_type_8_serial_single(self):
         """chain
@@ -435,7 +416,7 @@ class MoveGeneration:
             two_cards_comb = [list(x) for x in combinations(two_cards, len(s3_set))]
 
             for i in two_cards_comb:
-                serial_3_2_moves.append(sorted(s3 + i*2))
+                serial_3_2_moves.append(sorted(s3 + i * 2))
 
         self.new_move = serial_3_2_moves
 
@@ -467,7 +448,7 @@ class MoveGeneration:
                         if v == 4:
                             rival_4 = k
                 if not self.rival_move_length or (self.rival_move_length and fc > rival_4):
-                    type_13_4_2_moves.append(sorted([fc]*4 + i))
+                    type_13_4_2_moves.append(sorted([fc] * 4 + i))
 
         self.new_move = type_13_4_2_moves
 
@@ -500,7 +481,7 @@ class MoveGeneration:
                         if v == 4:
                             rival_4 = k
                 if not self.rival_move_length or (self.rival_move_length and fc > rival_4):
-                    type_14_4_22_moves.append(sorted([fc]*4 + i + i))
+                    type_14_4_22_moves.append(sorted([fc] * 4 + i + i))
 
         self.new_move = type_14_4_22_moves
 
@@ -525,35 +506,26 @@ class MoveGeneration:
         for i in self.new_move:
             i.sort()
 
+    def gen_type_17_2_2_1(self):
+        """
+        2+2+1
+        >>> mg = MoveGeneration([4, 4, 4, 5, 5, 5, 6, 8, 8], [3, 4, 4, 6, 6])
+        >>> mg.gen_type_17_2_2_1()
+        >>> mg.new_move
+        [[4, 4, 5, 8, 8], [4, 4, 6, 8, 8], [4, 5, 5, 8, 8], [5, 5, 6, 8, 8]]
+        >>> mg = MoveGeneration([4, 4, 5, 5, 5, 6, 6, 8], [])
+        >>> mg.gen_type_17_2_2_1()
+        >>> mg.new_move
+        [[4, 4, 5, 5, 6], [4, 4, 5, 5, 8], [4, 4, 5, 6, 6], [4, 4, 6, 6, 8], [4, 5, 5, 6, 6], [5, 5, 6, 6, 8]]
+        """
+        rival_2 = max([x for x in self.rival_move if Counter(self.rival_move)[x] == 2]) if self.rival_move_length else 0
+        pairs = sorted([k for k, v in self.cards_dict.items() if v >= 2])
+        pairs_comb = [list(x) for x in combinations(pairs, 2)]
 
-def play_a_move(player_hand: Deck, move_list: list, strength: int = 0, rule: int = 0) -> list:
-    """
-
-    :param player_hand:
-    :param move_list:
-    :param strength:
-    :param rule: original = 0, special = 1
-    :return: the move played
-    >>> a = Deck()
-    >>> b = [[6, 6]]
-    >>> a.cards = [5, 5, 5, 6, 7, 8, 9, 20, 30]
-    >>> play_a_move(a, b)
-    [20, 30]
-    """
-    rival_move = []
-    if len(move_list) != 0:
-        if len(move_list[-1]) == 0:
-            rival_move = move_list[-2]
-        else:
-            rival_move = move_list[-1]
-
-    move_generator = MoveGeneration(player_hand.cards, rival_move, rule)
-    move_generator.generate_move()
-    moves = move_generator.new_move
-
-    # move as a move list, modify for difference
-    idx = int(strength / 10 * len(moves))
-    move = moves[idx] if len(moves) else []
-    player_hand.remove_card_from_hand(move)
-
-    return move
+        for i in pairs_comb:
+            if max(i) > rival_2:
+                for j in self.cards:
+                    if j not in i and (i * 2 + [j]) not in self.new_move:
+                        self.new_move.append(i * 2 + [j])
+        for i in self.new_move:
+            i.sort()
