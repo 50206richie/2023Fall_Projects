@@ -26,7 +26,6 @@ def execute_simulation(
     :param write_file: Writes into csv when true
     """
     rules = rules
-    game_results = []  # Saves all results in a list
     if single_sim:
         landlord_lvs = range(landlord_lv, landlord_lv+1)
         peasants_lvs = range(peasants_lv, peasants_lv+1)
@@ -35,6 +34,7 @@ def execute_simulation(
         peasants_lvs = range(10)
 
     for rule in rules:
+        game_results = []  # Saves all results in a list
         for i in landlord_lvs:
             for j in peasants_lvs:
                 games = games
@@ -78,8 +78,8 @@ def execute_simulation(
                 games_result = {'games_played': games,
                                 'landlord_lv': i,
                                 'peasants_lv': j,
-                                'win_rate_l': landlord_win_rate,
-                                'win_rate_p': peasants_win_rate}
+                                'win_rate_landlord': landlord_win_rate,
+                                'win_rate_peasants': peasants_win_rate}
                 game_results.append(games_result)
 
         if write_file:
@@ -94,8 +94,9 @@ def execute_simulation(
 
 
 if __name__ == '__main__':
+    t0 = process_time()
     rules_list = [ORIGINAL_RULE, SPECIAL_RULE1, SPECIAL_RULE2, SPECIAL_RULE3]
-    games_per_simulation = 10
+    games_per_simulation = 1234
     level_of_landlord = 2
     level_of_peasants = 4
 
@@ -106,3 +107,6 @@ if __name__ == '__main__':
                        single_sim=False,
                        print_details=False,
                        write_file=True)
+
+    t = process_time() - t0
+    print('Total runtime:', t, 'seconds')
