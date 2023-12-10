@@ -3,7 +3,7 @@
 ## Quick Start
 Simply download the 5 .py modules and the .ipynb notebook.
 Run main.py first to get the data (.csv) file for analysis.
-(Or get it from the repo in /data; remember to place it in the same directory as the jupyter notebook)
+(Or get it from the repo in [/data](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-Simulation/tree/main/data))
 The data files are used in the Result_Analysis.ipynb for analysis.
 
 Notes: There are some modifiable arguments in the main.py:
@@ -82,7 +82,7 @@ Include functions for dealing cards, playing cards, checking if a winner exists,
 - The distribution of the points a landlord gets
 - Landlord Win Rates for different playing strength
 
-See [Result_Analysis](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-Simulation/blob/main/Result_Analysis.ipynb) for more details
+See [Result_Analysis](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-Simulation/blob/main/Result_Analysis.ipynb) and [Presentation]() for more details
 ***
 ## Experiments
 ### Experiment 1
@@ -92,12 +92,15 @@ Difference when the game rule "Two pairs with one" is added
 ### Experiment 3
 Difference when the game rule "Landlord plays an additional move before the game" is added
 
-See [Result_Analysis](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-Simulation/blob/main/Result_Analysis.ipynb) for more details
+See [Result_Analysis](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-Simulation/blob/main/Result_Analysis.ipynb) and [Presentation]() for more details
 ## Summary
 - The game design was more complicated than I thought, let alone doing deep learning on it.
 - In validation, we observed that the randomness of hand points has convergence.
 - The experiment of adding new rules made little impact on the win rates.
-  Consider making up another rule that is really different from the original to observe the difference between them.
+  Consider making up another rule really different from the original to observe a big difference between them.
+- All new special rules showed significant difference from the original rule,
+  but the statistics might not be that accurate since we only have 1234 games per simulation.
+- Too many factors that affect the results, making it hard to monitor the whole process.
 ## Future Works
 - Find out what functions occupy the most time and do enhancement, e.g. multiprocessing.
 - Maybe consider adding functions that make players record previous moves by all players.
