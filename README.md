@@ -38,8 +38,8 @@ The **objective** of the game is to **play all the cards** on hand to win!
 #### Deck
 A deck has two attributes:
 - Points: Used for bidding the landlord; better cards have higher points
-- Cards: A list that contains all cards in the deck, the point system is:
-  - 3~A are 3~14, 2 is 16
+- Cards: A list that contains all cards in the deck; the point system is:
+  - 3 to A are 3 to 14, 2 is 16
   - Small King (black Joker) is 20
   - Big King (colored Joker) is 30
 
