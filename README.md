@@ -3,7 +3,7 @@
 ## Quick Start
 Simply download the 5 .py modules and the .ipynb notebook.
 Run main.py first to get the data (.csv) file for analysis.
-(Or get it from the repo)
+(Or get it from the repo in /data; remember to place it in the same directory as the jupyter notebook)
 The data files are used in the Result_Analysis.ipynb for analysis.
 
 Notes: There are some modifiable arguments in the main.py:
@@ -23,12 +23,12 @@ Notes: There are some modifiable arguments in the main.py:
     the hand of players, moves played in a round
   - False: Prints only the win rates and runtime of each simulation
 - write_file:
-  - True: Writes .csv files to directory
+  - True: Writes .csv files to the directory
   - False: Does not write files
 ***
 ## Introduction
 [**Fighting the Landlord**](https://en.wikipedia.org/wiki/Dou_dizhu) (斗地主, Dou DiZhu) is a game that is played with Poker cards with Jokers included.
-There are three people in a game, one landlord and two peasants as a team.
+There are three people in a game: one landlord and two peasants as a team.
 Everyone is dealt 17 shuffled cards before the role assignment.
 Players bid to be the landlord, who gets the remaining three cards shown to all players.
 The **objective** of the game is to **play all the cards** on hand to win!
@@ -37,11 +37,11 @@ The **objective** of the game is to **play all the cards** on hand to win!
 ### Objects (objects.py)
 #### Deck
 A deck has two attributes:
-- Points: Used for bidding the landlord, better cards have higher points
+- Points: Used for bidding the landlord; better cards have higher points
 - Cards: A list that contains all cards in the deck
 #### Player
 A player has five attributes:
-- Character: Landlord, Peasant 1, Peasant 2 are assigned with different integers
+- Character: Landlord, Peasant 1, and Peasant 2 are assigned with different integers
 - Hand: The cards a player has on the hand
 - Hand points: Sum up the hand of a player for bidding the landlord
 - First player next round: True if the player plays first the next round
@@ -70,8 +70,8 @@ Legal moves:
 Added moves (special rule):
 - Pair with one: E.g. [3, 3, 4]
 - Two pairs with one: E.g. [3, 3, 4, 4, 5]
-### Game Funcitons (game_functions.py)
-Include funcitons for dealing cards, playing a card, checking if winner exists, etc.
+### Game Functions (game_functions.py)
+Include functions for dealing cards, playing cards, checking if a winner exists, etc.
 ***
 ## Validation of the Simulation
 - The distribution of the points a landlord gets
@@ -81,20 +81,20 @@ See [Result_Analysis](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-S
 ***
 ## Experiments
 ### Experiment 1
-Difference when game rule "Pair with one" is added
+Difference when the game rule "Pair with one" is added
 ### Experiment 2
-Difference when game rule "Two pairs with one" is added
+Difference when the game rule "Two pairs with one" is added
 ### Experiment 3
-Difference when game rule "Landlord plays an additional move before game" is added
+Difference when the game rule "Landlord plays an additional move before the game" is added
 
 See [Result_Analysis](https://github.com/50206richie/DouDiZhu-with-Monte-Carlo-Simulation/blob/main/Result_Analysis.ipynb) for more details
 ## Summary
-- The game design was more complicated than I thought, let along doing deep learning on it.
+- The game design was more complicated than I thought, let alone doing deep learning on it.
 - In validation, we observed that the randomness of hand points has convergence.
-- The experiment of adding new rules made little impact on the win rates, 
-consider making up another rule that is really different from the original to observe difference between them.
+- The experiment of adding new rules made little impact on the win rates.
+  Consider making up another rule that is really different from the original to observe the difference between them.
 ## Future Works
-- Find out what functions occupy the most times and do enhancement, e.g. multiprocessing.
+- Find out what functions occupy the most time and do enhancement, e.g. multiprocessing.
 - Maybe consider adding functions that make players record previous moves by all players.
 ## References
 1. [Zha, Daochen et al. “DouZero: Mastering DouDizhu with Self-Play Deep Reinforcement Learning.” ICML (2021)
